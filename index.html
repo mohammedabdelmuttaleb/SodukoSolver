@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SUDOKU — Neural Grid</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="scanline"></div>
+
+  <div class="app">
+
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-bracket">[</span>
+          <span class="logo-text">SUDOKU</span>
+          <span class="logo-bracket">]</span>
+        </div>
+        <div class="tagline">NEURAL GRID v2.0</div>
+      </div>
+      <div class="header-right">
+        <div class="stat-box">
+          <span class="stat-label">TIME</span>
+          <span class="stat-value" id="timer">00:00</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">ERRORS</span>
+          <span class="stat-value" id="error-count">0<span class="stat-max">/3</span></span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">SCORE</span>
+          <span class="stat-value" id="score">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <aside class="panel panel-left">
+        <div class="panel-section">
+          <div class="panel-title">DIFFICULTY</div>
+          <div class="difficulty-grid">
+            <button class="diff-btn active" data-level="easy">EASY</button>
+            <button class="diff-btn" data-level="medium">MED</button>
+            <button class="diff-btn" data-level="hard">HARD</button>
+            <button class="diff-btn" data-level="expert">XPERT</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">CONTROLS</div>
+          <button class="ctrl-btn primary" id="new-game-btn">
+            <span class="btn-icon">▶</span> NEW GAME
+          </button>
+          <button class="ctrl-btn" id="hint-btn">
+            <span class="btn-icon">◈</span> HINT <span class="hint-count" id="hint-count">3</span>
+          </button>
+          <button class="ctrl-btn" id="erase-btn">
+            <span class="btn-icon">◻</span> ERASE
+          </button>
+          <button class="ctrl-btn" id="notes-btn">
+            <span class="btn-icon">◎</span> NOTES <span class="notes-indicator" id="notes-indicator">OFF</span>
+          </button>
+          <button class="ctrl-btn danger" id="solve-btn">
+            <span class="btn-icon">⬡</span> AUTO-SOLVE
+          </button>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">PROGRESS</div>
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill" id="progress-ring" cx="40" cy="40" r="32"/>
+              <text class="ring-text" x="40" y="45" id="progress-text">0%</text>
+            </svg>
+          </div>
+        </div>
+      </aside>
+
+      <div class="board-wrap">
+        <div class="board-glow"></div>
+        <div class="board" id="board"></div>
+      </div>
+
+      <aside class="panel panel-right">
+        <div class="panel-section">
+          <div class="panel-title">INPUT</div>
+          <div class="numpad" id="numpad">
+            <button class="num-btn" data-num="1">1</button>
+            <button class="num-btn" data-num="2">2</button>
+            <button class="num-btn" data-num="3">3</button>
+            <button class="num-btn" data-num="4">4</button>
+            <button class="num-btn" data-num="5">5</button>
+            <button class="num-btn" data-num="6">6</button>
+            <button class="num-btn" data-num="7">7</button>
+            <button class="num-btn" data-num="8">8</button>
+            <button class="num-btn" data-num="9">9</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">LEGEND</div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-box given"></span><span>GIVEN</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-box user"></span><span>INPUT</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-box selected"></span><span>SELECTED</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-box error"></span><span>ERROR</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-box highlight"></span><span>RELATED</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">NUMBER FREQ</div>
+          <div class="freq-grid" id="freq-grid">
+          </div>
+        </div>
+      </aside>
+
+    </main>
+
+    <div class="overlay" id="win-overlay">
+      <div class="overlay-card">
+        <div class="overlay-title">SOLVED!</div>
+        <div class="overlay-subtitle">NEURAL GRID COMPLETE</div>
+        <div class="overlay-stats">
+          <div class="ov-stat"><span>TIME</span><strong id="ov-time">—</strong></div>
+          <div class="ov-stat"><span>ERRORS</span><strong id="ov-errors">—</strong></div>
+          <div class="ov-stat"><span>SCORE</span><strong id="ov-score">—</strong></div>
+        </div>
+        <button class="ctrl-btn primary" id="ov-new-btn">▶ PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="gameover-overlay">
+      <div class="overlay-card error-card">
+        <div class="overlay-title">GRID FAILED</div>
+        <div class="overlay-subtitle">TOO MANY ERRORS</div>
+        <button class="ctrl-btn primary" id="go-new-btn">▶ TRY AGAIN</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
